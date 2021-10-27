@@ -1,0 +1,13 @@
+div {
+    margin: auto;
+    width: 75%;
+    height: 100%;
+    padding: 10px;
+}
+
+canvas {
+    height: 100%;
+    width: 100%;
+    border: 1px gray solid;
+    ;
+}
