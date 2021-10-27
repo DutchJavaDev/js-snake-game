@@ -1,14 +1,19 @@
+// Canvas
 let canvas, canvasContext;
 let canvasWidth, canvasHeight;
 
 // Snake
 let snakeWidth = 4;
 let snakeHeight = 4;
-let snakeX;
-let snakeY;
-let xVelocity = 2;
-let yVelocity = 2;
-let tail = {};
+let velocity = 1;
+let xVelocity = 0;
+let yVelocity = 0;
+let snakeBody = [{ x: 0, y: 0, width: snakeWidth, height: snakeHeight }, { x: 0, y: 0, width: snakeWidth, height: snakeHeight }]
+
+let foodX;
+let foodY;
+let foodWidth = 3;
+let foodHeight = 3;
 
 // Input
 let keyMap = {
@@ -23,10 +28,10 @@ let start, previousTimeStamp;
 
 // Game
 let gameOver = false;
-let eggX;
-let eggY;
-let eggWidth = 3;
-let eggHeight = 3;
+let points = 0;
+
+// UI
+let colors = ['red', 'yellow', 'pink'];
 
 window.addEventListener('DOMContentLoaded', function() {
 
@@ -35,6 +40,8 @@ window.addEventListener('DOMContentLoaded', function() {
 
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
+
+    createSnake();
 
     window.addEventListener("keydown", function(e) {
         if (e.code in keyMap) {
@@ -48,102 +55,154 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     })
 
-    spawnHead();
-    spawnEgg();
+    spawnFood();
     window.requestAnimationFrame(gameLoop)
 })
 
-function randomIntBetween(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
+function createSnake() {
+    snakeBody[0].x = canvasWidth / 2 - snakeWidth / 2;
+    snakeBody[0].y = canvasHeight / 2 - snakeHeight / 2;
+
+    snakeBody[1].x = snakeBody[0].x + snakeWidth;
+    snakeBody[1].y = snakeBody[0].y;
+
+    console.log(snakeBody);
+}
+
+function spawnFood() {
+    foodX = randomIntBetween(foodWidth * 2, canvasWidth - foodWidth * 2)
+    foodY = randomIntBetween(foodHeight * 2, canvasHeight - foodHeight * 2)
 }
 
 function gameLoop() {
 
-    clearScreen();
+    clear();
 
     handleInput();
 
-    drawHead();
-
-    drawEgg();
-
-    // update tail
-
     checkCollision();
+
+    drawFood();
+
+    drawSnakeBody();
 
     window.requestAnimationFrame(gameLoop);
 }
 
-function spawnHead() {
-    snakeX = canvasWidth / 2 - snakeWidth / 2;
-    snakeY = canvasHeight / 2 - snakeHeight / 2;
-}
-
-function spawnEgg() {
-    eggX = randomIntBetween(eggWidth, canvasWidth - eggWidth);
-    eggY = randomIntBetween(eggHeight, canvasHeight - eggHeight);
-}
 
 function handleInput() {
 
-    if (gameOver)
-        return;
-
     if (keyMap["ArrowLeft"]) {
-        snakeX -= xVelocity;
-    } else if (keyMap["ArrowRight"]) {
-        snakeX += xVelocity;
-    } else if (keyMap["ArrowUp"]) {
-        snakeY -= yVelocity;
-    } else if (keyMap["ArrowDown"]) {
-        snakeY += yVelocity;
+        xVelocity = velocity * -1;
+        yVelocity = 0;
     }
+
+    if (keyMap["ArrowRight"]) {
+        xVelocity = velocity * 1;
+        yVelocity = 0;
+    }
+
+    if (keyMap["ArrowUp"]) {
+        yVelocity = velocity * -1;
+        xVelocity = 0;
+    }
+
+    if (keyMap["ArrowDown"]) {
+        yVelocity = velocity * 1;
+        xVelocity = 0;
+    }
+
+    snakeBody[0].x += xVelocity;
+    snakeBody[0].y += yVelocity;
+
+    if (xVelocity != 0 || yVelocity != 0)
+        updateBody();
 }
 
 function checkCollision() {
-    snakeCollision();
-    eggCollision();
+    borderCollision();
+    foodCollison();
 }
 
-function snakeCollision() {
-    if (snakeX <= 0) {
-        snakeX = 0;
+function borderCollision() {
+    let head = snakeBody[0];
+
+    if (head.x < 0) {
+        head.x = 0;
         gameOver = true;
-    } else if (snakeX + snakeWidth > canvasWidth) {
-        snakeX = canvasWidth - snakeWidth;
+    }
+
+    if (head.x + snakeWidth > canvasWidth) {
+        head.x = canvasWidth - snakeWidth;
         gameOver = true;
-    } else if (snakeY <= 0) {
-        snakeY = 0;
+    }
+
+    if (head.y < 0) {
+        head.y = 0;
         gameOver = true;
-    } else if (snakeY + snakeHeight > canvasHeight) {
-        snakeY = canvasHeight - snakeHeight;
+    }
+
+    if (head.y + snakeHeight > canvasHeight) {
+        head.y = canvasHeight - snakeHeight;
         gameOver = true;
+    }
+
+}
+
+function foodCollison() {
+    let head = snakeBody[0];
+
+    if (areColliding(head.x, head.y, snakeWidth, snakeHeight, foodX, foodY, foodWidth, foodHeight)) {
+        if (xVelocity < 0) {
+            snakeBody.unshift({ x: head.x - snakeWidth, y: head.y, width: snakeWidth, height: snakeHeight })
+        } else if (xVelocity > 0) {
+            snakeBody.unshift({ x: head.x + snakeWidth, y: head.y, width: snakeWidth, height: snakeHeight })
+        } else if (yVelocity < 0) {
+            snakeBody.unshift({ x: head.x, y: head.y - snakeHeight, width: snakeWidth, height: snakeHeight })
+        } else if (yVelocity > 0) {
+            snakeBody.unshift({ x: head.x, y: head.y + snakeHeight, width: snakeWidth, height: snakeHeight })
+        } else {
+            // do nothing
+        }
+
+        points++;
+
+        spawnFood();
     }
 }
 
-function eggCollision() {
-    if (areColliding(snakeX, snakeY, snakeWidth, snakeHeight, eggX, eggY, eggWidth, eggHeight)) {
-        // add tail
+function updateBody() {
+    for (let i = 1; i < snakeBody.length; i++) {
+        snakeBody[i].x += xVelocity;
+        snakeBody[i].y += yVelocity;
     }
 }
 
-function clearScreen() {
+function clear() {
     canvasContext.fillStyle = 'black';
     canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
 }
 
-function drawHead() {
-    canvasContext.fillStyle = '#4361ee';
-    canvasContext.fillRect(snakeX, snakeY, snakeWidth, snakeHeight);
+function drawSnakeBody() {
+    canvasContext.fillStyle = 'white'
+
+    for (let i = 0; i < snakeBody.length; i++) {
+        let bodyPart = snakeBody[i];
+        canvasContext.fillRect(bodyPart.x, bodyPart.y, bodyPart.width, bodyPart.height);
+    }
 }
 
-function drawEgg() {
-    canvasContext.fillStyle = '#ffa631';
-    canvasContext.fillRect(eggX, eggY, eggWidth, eggHeight);
+function drawFood() {
+    canvasContext.fillStyle = 'orange'
+    canvasContext.fillRect(foodX, foodY, foodWidth, foodHeight)
 }
 
 // aabb collision
 function areColliding(x1, y1, width1, height1, x2, y2, width2, height2) {
     return (x1 < x2 + width2 && x1 + width1 > x2 &&
         y1 < y2 + height2 && y1 + height1 > y2)
+}
+
+function randomIntBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min)
 }
