@@ -1,37 +1,31 @@
 // Canvas
 let canvas, canvasContext;
 let canvasWidth, canvasHeight;
+let clearColor = 'red'
+
+// Game
+let size = 10;
+let velocity = size;
+let count = 0;
 
 // Snake
-let snakeWidth = 4;
-let snakeHeight = 4;
-let velocity = 1;
-let xVelocity = 0;
-let yVelocity = 0;
-let snakeBody = [{ x: 0, y: 0, width: snakeWidth, height: snakeHeight }, { x: 0, y: 0, width: snakeWidth, height: snakeHeight }]
-
-let foodX;
-let foodY;
-let foodWidth = 3;
-let foodHeight = 3;
+var snakeBody = {
+    x: 0,
+    y: 160,
+    xv: velocity,
+    yv: 0,
+    bodyParts: [],
+    maxBodyParts: 4
+}
 
 // Input
 let keyMap = {
     "ArrowLeft": false,
     "ArrowRight": false,
     "ArrowUp": false,
-    "ArrowDown": false
+    "ArrowDown": false,
+    "Space": false
 }
-
-// Gameloop
-let start, previousTimeStamp;
-
-// Game
-let gameOver = false;
-let points = 0;
-
-// UI
-let colors = ['red', 'yellow', 'pink'];
 
 window.addEventListener('DOMContentLoaded', function() {
 
@@ -41,7 +35,6 @@ window.addEventListener('DOMContentLoaded', function() {
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
 
-    createSnake();
 
     window.addEventListener("keydown", function(e) {
         if (e.code in keyMap) {
@@ -55,146 +48,77 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     })
 
-    spawnFood();
+    snakeBody.y = canvasHeight / 2
+    snakeBody.x = canvasWidth / 2
+
     window.requestAnimationFrame(gameLoop)
 })
 
-function createSnake() {
-    snakeBody[0].x = canvasWidth / 2 - snakeWidth / 2;
-    snakeBody[0].y = canvasHeight / 2 - snakeHeight / 2;
-
-    snakeBody[1].x = snakeBody[0].x + snakeWidth;
-    snakeBody[1].y = snakeBody[0].y;
-
-    console.log(snakeBody);
-}
-
-function spawnFood() {
-    foodX = randomIntBetween(foodWidth * 2, canvasWidth - foodWidth * 2)
-    foodY = randomIntBetween(foodHeight * 2, canvasHeight - foodHeight * 2)
-}
-
 function gameLoop() {
+    window.requestAnimationFrame(gameLoop)
 
-    clear();
+    if (++count < 4) {
+        return;
+    }
 
-    handleInput();
+    count = 0;
 
-    checkCollision();
+    clearCanvas()
 
-    drawFood();
+    handleInput()
 
-    drawSnakeBody();
-
-    window.requestAnimationFrame(gameLoop);
+    drawSnakeBody()
 }
 
-
-function handleInput() {
-
-    if (keyMap["ArrowLeft"]) {
-        xVelocity = velocity * -1;
-        yVelocity = 0;
-    }
-
-    if (keyMap["ArrowRight"]) {
-        xVelocity = velocity * 1;
-        yVelocity = 0;
-    }
-
-    if (keyMap["ArrowUp"]) {
-        yVelocity = velocity * -1;
-        xVelocity = 0;
-    }
-
-    if (keyMap["ArrowDown"]) {
-        yVelocity = velocity * 1;
-        xVelocity = 0;
-    }
-
-    snakeBody[0].x += xVelocity;
-    snakeBody[0].y += yVelocity;
-
-    if (xVelocity != 0 || yVelocity != 0)
-        updateBody();
-}
-
-function checkCollision() {
-    borderCollision();
-    foodCollison();
-}
-
-function borderCollision() {
-    let head = snakeBody[0];
-
-    if (head.x < 0) {
-        head.x = 0;
-        gameOver = true;
-    }
-
-    if (head.x + snakeWidth > canvasWidth) {
-        head.x = canvasWidth - snakeWidth;
-        gameOver = true;
-    }
-
-    if (head.y < 0) {
-        head.y = 0;
-        gameOver = true;
-    }
-
-    if (head.y + snakeHeight > canvasHeight) {
-        head.y = canvasHeight - snakeHeight;
-        gameOver = true;
-    }
-
-}
-
-function foodCollison() {
-    let head = snakeBody[0];
-
-    if (areColliding(head.x, head.y, snakeWidth, snakeHeight, foodX, foodY, foodWidth, foodHeight)) {
-        if (xVelocity < 0) {
-            snakeBody.unshift({ x: head.x - snakeWidth, y: head.y, width: snakeWidth, height: snakeHeight })
-        } else if (xVelocity > 0) {
-            snakeBody.unshift({ x: head.x + snakeWidth, y: head.y, width: snakeWidth, height: snakeHeight })
-        } else if (yVelocity < 0) {
-            snakeBody.unshift({ x: head.x, y: head.y - snakeHeight, width: snakeWidth, height: snakeHeight })
-        } else if (yVelocity > 0) {
-            snakeBody.unshift({ x: head.x, y: head.y + snakeHeight, width: snakeWidth, height: snakeHeight })
-        } else {
-            // do nothing
-        }
-
-        points++;
-
-        spawnFood();
-    }
-}
-
-function updateBody() {
-    for (let i = 1; i < snakeBody.length; i++) {
-        snakeBody[i].x += xVelocity;
-        snakeBody[i].y += yVelocity;
-    }
-}
-
-function clear() {
-    canvasContext.fillStyle = 'black';
+function clearCanvas() {
+    canvasContext.fillStyle = 'black'
     canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
 }
 
-function drawSnakeBody() {
-    canvasContext.fillStyle = 'white'
-
-    for (let i = 0; i < snakeBody.length; i++) {
-        let bodyPart = snakeBody[i];
-        canvasContext.fillRect(bodyPart.x, bodyPart.y, bodyPart.width, bodyPart.height);
+function handleInput() {
+    if (keyMap["ArrowLeft"]) {
+        snakeBody.xv = velocity * -1
+        snakeBody.yv = 0
+    } else if (keyMap["ArrowRight"]) {
+        snakeBody.xv = velocity
+        snakeBody.yv = 0
+    } else if (keyMap["ArrowUp"]) {
+        snakeBody.yv = velocity * -1
+        snakeBody.xv = 0
+    } else if (keyMap["ArrowDown"]) {
+        snakeBody.yv = velocity
+        snakeBody.xv = 0
+    } else if (keyMap["Space"]) {
+        snakeBody.xv = 0
+        snakeBody.yv = 0
+        console.log(snakeBody)
     }
+
+    if (snakeBody.xv != 0 || snakeBody.yv != 0) {
+        snakeBody.bodyParts.unshift({ x: snakeBody.x, y: snakeBody.y });
+    }
+
+    snakeBody.x += snakeBody.xv;
+    snakeBody.y += snakeBody.yv;
+
+    if (snakeBody.bodyParts.length > snakeBody.maxBodyParts)
+        snakeBody.bodyParts.pop();
 }
 
-function drawFood() {
-    canvasContext.fillStyle = 'orange'
-    canvasContext.fillRect(foodX, foodY, foodWidth, foodHeight)
+function drawSnakeBody() {
+
+    for (let i = 0; i < snakeBody.bodyParts.length; i++) {
+
+        if (i == 0) {
+            canvasContext.fillStyle = 'green'
+        } else {
+            canvasContext.fillStyle = 'red'
+        }
+
+        let part = snakeBody.bodyParts[i];
+
+        canvasContext.fillRect(part.x, part.y, size - 1, size - 1);
+    }
 }
 
 // aabb collision
@@ -203,6 +127,7 @@ function areColliding(x1, y1, width1, height1, x2, y2, width2, height2) {
         y1 < y2 + height2 && y1 + height1 > y2)
 }
 
+// https://stackoverflow.com/a/1527820/2124254
 function randomIntBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
