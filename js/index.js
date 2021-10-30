@@ -1,3 +1,5 @@
+import api from "./apiService.js";
+
 // Canvas
 const clearColor = 'black'
 let canvas, canvasContext
@@ -50,7 +52,7 @@ const keyPressed = {
     "KeyS": false,
 }
 
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', async function() {
 
     canvas = document.querySelector("div canvas")
     canvasContext = canvas.getContext("2d");
@@ -79,10 +81,11 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     })
 
+    updateHighScores()
+
     window.requestAnimationFrame(gameLoop)
 })
 
-// aabb collision
 function partHit(part) {
     let head = snakeBody.bodyParts[0]
     return areColliding(head.x, head.y, part.x, part.y)
@@ -97,6 +100,7 @@ function foodHit() {
     return areColliding(head.x, head.y, food.x, food.y)
 }
 
+// aabb collision
 function areColliding(x1, y1, x2, y2) {
     return (x1 < x2 + size - 1 && x1 + size - 1 > x2 &&
         y1 < y2 + size - 1 && y1 + size - 1 > y2)
@@ -116,14 +120,18 @@ function spawnFood() {
     food.y = randomIntBetween(10, canvasHeight - 10)
 }
 
-function stopGame() {
+async function stopGame() {
     gameRunning = false
     gameOver = true
     snakeBody.bodyParts = []
     snakeBody.xv = 0
     snakeBody.yv = 0
     snakeBody.maxBodyParts = maxBodyParts
-        // send score to backend
+
+    // send score to backend
+    await api.postScore(score)
+    updateHighScores()
+    score = 0
 }
 
 function startGame() {
@@ -132,6 +140,11 @@ function startGame() {
     snakeBody.xv = velocity
     gameRunning = true
     gameOver = false
+}
+
+async function updateHighScores() {
+    let data = await api.getHighScore()
+    document.getElementById('score').append(data)
 }
 
 function gameLoop() {
