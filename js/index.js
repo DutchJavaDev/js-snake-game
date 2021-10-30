@@ -7,7 +7,7 @@ let canvasWidth, canvasHeight
 const size = 5
 const velocity = size
 const maxBodyParts = 1
-let frameCount = 0
+let frameCount = 0 // make this change 
 let gameRunning = false
 let gameOver = false
 
@@ -85,8 +85,7 @@ window.addEventListener('DOMContentLoaded', function() {
 // aabb collision
 function partHit(part) {
     let head = snakeBody.bodyParts[0]
-    return ((head.x < part.x + size - 1 && head.x + size - 1 > part.x &&
-        head.y < part.y + size - 1 && head.y + size - 1 > part.y))
+    return areColliding(head.x, head.y, part.x, part.y)
 }
 
 function foodHit() {
@@ -95,8 +94,12 @@ function foodHit() {
     if (head == null)
         return false
 
-    return ((head.x < food.x + size - 1 && head.x + size - 1 > food.x &&
-        head.y < food.y + size - 1 && head.y + size - 1 > food.y))
+    return areColliding(head.x, head.y, food.x, food.y)
+}
+
+function areColliding(x1, y1, x2, y2) {
+    return (x1 < x2 + size - 1 && x1 + size - 1 > x2 &&
+        y1 < y2 + size - 1 && y1 + size - 1 > y2)
 }
 
 function randomIntBetween(min, max) {
