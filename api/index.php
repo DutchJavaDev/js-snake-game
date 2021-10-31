@@ -15,24 +15,20 @@ if($request_method == 'GET') {
     $scoreArray = $db->getTopScores();
 
     if(count($scoreArray) == 0) {
-        echo '<h2>Play some more games first to see your highscores</h2>';
+        echo 'empty';
     }
     else
     {
-        $table = '
-        <h3>Top 10 highscores</h3> 
-        <table>
-            <tr>
-                Score
-            <tr>';
-    
+        $topScores = array();
+
         foreach($scoreArray as $row) {
-            $table .= '<tr><td>' . $row['score'] . '</td></tr>';
+            $record = new stdClass();
+            $record->name = $row['name'];
+            $record->score = $row['score'];
+            array_push($topScores, $record);
         }
-    
-        $table .= '</table>';
-    
-        echo $table;
+
+        echo json_encode($topScores);
     }
 
     http_response_code(200);
@@ -40,14 +36,21 @@ if($request_method == 'GET') {
 } else if($request_method == 'POST') {
 
     // Bad request
-    if(!isset($_POST['score']))
+    if(!isset($_POST['score']) || !isset($_POST['name']))
         return http_response_code(400);
 
     $db = new DbService($host, $db, $user, $password);
 
+    $name = $_POST['name'];
     $score = $_POST['score'];
 
-    $db->addScore($score);
+    if($db->nameExists($name)) {
+        echo 'name has been taken ';
+        http_response_code(400);
+        return;
+    }
+
+    $db->addScore($name,$score);
 
     http_response_code(201);
 
