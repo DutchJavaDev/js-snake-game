@@ -144,7 +144,22 @@ function startGame() {
 
 async function updateHighScores() {
     let data = await api.getHighScore()
-    document.getElementById('score').append(data)
+
+    if (data == undefined) {
+        let error = document.createElement('h2')
+        error.innerHTML = 'Failed to fetch from api'
+        document.getElementById('score').append(error)
+    } else if (data == 'empty') {
+        document.getElementById('score').append('Play some more games first')
+    } else {
+        let scoreDiv = document.getElementById('score')
+
+        for (var i = 0; i < data.length; i++) {
+            let div = document.createElement('div')
+            div.innerHTML = `#${i+1} Name: ${data[i].name}, Score: ${data[i].score}`;
+            scoreDiv.append(div)
+        }
+    }
 }
 
 function gameLoop() {
@@ -199,15 +214,15 @@ function handleInput() {
     snakeBody.x += snakeBody.xv;
     snakeBody.y += snakeBody.yv;
 
+    if (snakeBody.bodyParts.length > snakeBody.maxBodyParts)
+        snakeBody.bodyParts.pop();
+
     for (var i = 1; i < snakeBody.bodyParts.length; i++) {
         if (partHit(snakeBody.bodyParts[i]) && snakeBody.maxBodyParts > 1) {
             stopGame()
             return
         }
     }
-
-    if (snakeBody.bodyParts.length > snakeBody.maxBodyParts)
-        snakeBody.bodyParts.pop();
 }
 
 function checkCollision() {
@@ -222,9 +237,7 @@ function wallCollision() {
         (snakeBody.y < 0) ||
         (snakeBody.y + size > canvasHeight)) {
         stopGame()
-        return true
     }
-    return false
 }
 
 function foodCollision() {
