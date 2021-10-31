@@ -23,10 +23,17 @@
             }
         }
 
-        public function addScore(int $score) {
-            $insertQuery = 'INSERT INTO `score_table`(`score`) VALUES (?)';
+        public function nameExists($name) {
+            $setlectQuery = 'SELECT `name` from `score_table` where `name` = ?';
+            $stmt = $this->connection->prepare($setlectQuery);
+            $stmt->execute([$name]);
+            return $stmt->rowCount();
+        }
+
+        public function addScore($name,$score) {
+            $insertQuery = 'INSERT INTO `score_table`(`name`,`score`) VALUES (?,?)';
             $stmt = $this->connection->prepare($insertQuery);
-            $stmt->execute([$score]);
+            $stmt->execute([$name,$score]);
         }
 
         public function getTopScores() {
