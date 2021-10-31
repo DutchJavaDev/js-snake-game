@@ -14,7 +14,7 @@ canvas {
     border: 1px gray solid;
 }
 
-#score {
+#highscoreRegion {
     margin-left: 0px;
     width: 73%;
     border: 1px white solid
