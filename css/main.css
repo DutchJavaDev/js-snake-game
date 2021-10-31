@@ -3,14 +3,19 @@ body {
 }
 
 div {
-    margin: auto;
+    margin: 0px auto;
     width: 75%;
     height: 100%;
     padding: 10px;
 }
 
 canvas {
-    height: 75%;
     width: 75%;
     border: 1px gray solid;
+}
+
+#score {
+    margin-left: 0px;
+    width: 73%;
+    border: 1px white solid
 }
