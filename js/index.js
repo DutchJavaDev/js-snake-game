@@ -144,19 +144,21 @@ function startGame() {
 
 async function updateHighScores() {
     let data = await api.getHighScore()
-    let scoreDiv = document.getElementById('score')
+    let highscoreRegionDiv = document.getElementById('highscoreRegion')
+
+    highscoreRegionDiv.innerHTML = ""
 
     if (data == undefined) {
         let error = document.createElement('h2')
         error.innerHTML = 'Failed to fetch from api'
-        scoreDiv.append(error)
+        highscoreRegionDiv.append(error)
     } else if (data.length == 0) {
-        scoreDiv.append('No highscores to display yet..')
+        highscoreRegionDiv.append('No highscores to display yet..')
     } else {
         for (var i = 0; i < data.length; i++) {
             let div = document.createElement('div')
             div.innerHTML = `#${i+1} Name: ${data[i].name}, Score: ${data[i].score}`;
-            scoreDiv.append(div)
+            highscoreRegionDiv.append(div)
         }
     }
 }
