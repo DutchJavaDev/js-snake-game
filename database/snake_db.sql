@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Gegenereerd op: 31 okt 2021 om 01:10
+-- Gegenereerd op: 31 okt 2021 om 23:05
 -- Serverversie: 10.4.17-MariaDB
 -- PHP-versie: 8.0.0
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `snake_db`
 --
-CREATE DATABASE IF NOT EXISTS `snake_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `snake_db`;
 
 -- --------------------------------------------------------
 
@@ -31,7 +29,8 @@ USE `snake_db`;
 
 CREATE TABLE `score_table` (
   `Id` int(11) NOT NULL,
-  `score` int(11) NOT NULL
+  `score` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -52,7 +51,7 @@ ALTER TABLE `score_table`
 -- AUTO_INCREMENT voor een tabel `score_table`
 --
 ALTER TABLE `score_table`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
