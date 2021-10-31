@@ -16,13 +16,7 @@ export default {
     async getHighScore() {
         return await fetch(apiUrl, {
             method: 'GET',
-        }).then(function(data) {
-            console.log(data)
-            if (data != 'empty')
-                return data.json()
-            else
-                return data.text()
-        }).then(function(data) {
+        }).then(data => data.json()).then(function(data) {
             return data
         }).catch(function(error) {
             return undefined;

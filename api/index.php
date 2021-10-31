@@ -15,7 +15,7 @@ if($request_method == 'GET') {
     $scoreArray = $db->getTopScores();
 
     if(count($scoreArray) == 0) {
-        echo 'empty';
+        echo json_encode(array());
     }
     else
     {
