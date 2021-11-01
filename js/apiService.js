@@ -12,7 +12,6 @@ export default {
         })
     },
 
-    // redo this, kinda messy
     async getHighScore() {
         return await fetch(apiUrl, {
             method: 'GET',
