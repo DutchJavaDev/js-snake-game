@@ -1,6 +1,7 @@
 <?php 
 require_once("database.php");
 
+// Requests
 $request_method = $_SERVER['REQUEST_METHOD'];
 $host = 'db';
 $db = 'snakedb';
@@ -9,10 +10,19 @@ $password = '';
 
 
 if($request_method == 'GET') {
+    handleGetRequest($host, $db, $user, $password);
+} else if($request_method == 'POST') {
+    handlePostRequest($host, $db, $user, $password, $request_url, $check_username_param);
+} else {
+    // Method Not Allowed
+    http_response_code(405);
+}
 
-    $db = new DbService($host, $db, $user, $password);
+function handleGetRequest($host, $db, $user, $password) {
+    
+    $databaseService = new DbService($host, $db, $user, $password);
 
-    $scoreArray = $db->getTopScores();
+    $scoreArray = $databaseService->getTopScores();
 
     if(count($scoreArray) == 0) {
         echo json_encode(array());
@@ -32,30 +42,46 @@ if($request_method == 'GET') {
     }
 
     http_response_code(200);
+}
 
-} else if($request_method == 'POST') {
+function handlePostRequest($host, $db, $user, $password, $request_url, $check_username_param) {
+    $databaseService = new DbService($host, $db, $user, $password);
 
-    // Bad request
-    if(!isset($_POST['score']) || !isset($_POST['name']))
-        return http_response_code(400);
+    $parameters = parse_url($request_url, PHP_URL_QUERY);
 
-    $db = new DbService($host, $db, $user, $password);
+    // http://localhost/api?checkusername=[username to check]
+    if(str_contains($parameters, $check_username_param))
+    {
+        if($databaseService->nameExists(str_split($parameters, strlen($check_username_param))[1])) {
+            echo 'name has been taken, please try another';
+            http_response_code(400);
+            return;
+        }
 
-    $name = $_POST['name'];
-    $score = $_POST['score'];
-
-    if($db->nameExists($name)) {
-        echo 'name has been taken ';
-        http_response_code(400);
+        http_response_code(200);
         return;
     }
+    else
+    {
+        // Bad request
+        if(!isset($_POST['score']) || !isset($_POST['name']))
+            return http_response_code(400);
 
-    $db->addScore($name,$score);
+        $name = $_POST['name'];
+        $score = $_POST['score'];
 
-    http_response_code(201);
-
-} else {
-    // Method Not Allowed
-    http_response_code(405);
+        if($databaseService->nameExists($name))
+        {
+            $databaseService->updateScore($name, $score);
+            echo $name;
+        }
+        else
+        {
+            $databaseService->addScore($name,$score);
+        }
+        
+        http_response_code(201);
+        return;
+    }
 }
 ?>

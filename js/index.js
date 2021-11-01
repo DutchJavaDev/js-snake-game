@@ -9,9 +9,10 @@ let canvasWidth, canvasHeight
 const size = 5
 const velocity = size
 const maxBodyParts = 1
-let frameCount = 0 // make this change 
+let frameCount = 0
 let gameRunning = false
 let gameOver = false
+let name
 
 // UI
 const textColor = 'white'
@@ -83,8 +84,26 @@ window.addEventListener('DOMContentLoaded', async function() {
 
     updateHighScores()
 
-    window.requestAnimationFrame(gameLoop)
+    getUserName()
 })
+
+async function getUserName() {
+    let _name = prompt("Please enter name")
+
+    if (_name == "" || _name == undefined) {
+        getUserName()
+    } else {
+        let response = await api.nameExists(_name)
+
+        if (response == 'name has been taken, please try another') {
+            alert(response)
+            getUserName()
+        } else {
+            name = _name
+            window.requestAnimationFrame(gameLoop)
+        }
+    }
+}
 
 function partHit(part) {
     let head = snakeBody.bodyParts[0]
@@ -129,9 +148,11 @@ async function stopGame() {
     snakeBody.maxBodyParts = maxBodyParts
 
     // send score to backend
-    await api.postScore(score)
-    updateHighScores()
-    score = 0
+    if (score > 0) {
+        await api.postScore(name, score)
+        updateHighScores()
+        score = 0
+    }
 }
 
 function startGame() {

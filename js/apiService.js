@@ -21,5 +21,15 @@ export default {
         }).catch(function(error) {
             return undefined;
         })
+    },
+
+    async nameExists(name) {
+        return await fetch(`${apiUrl}?checkusername=${name}`, {
+            method: 'POST',
+        }).then(data => data.text()).then(function(data) {
+            return data
+        }).catch(function(error) {
+            return undefined
+        })
     }
 }
