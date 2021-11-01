@@ -27,13 +27,19 @@
             $setlectQuery = 'SELECT `name` from `score_table` where `name` = ?';
             $stmt = $this->connection->prepare($setlectQuery);
             $stmt->execute([$name]);
-            return $stmt->rowCount();
+            return count($stmt->fetchAll(PDO::FETCH_ASSOC));
         }
 
         public function addScore($name,$score) {
             $insertQuery = 'INSERT INTO `score_table`(`name`,`score`) VALUES (?,?)';
             $stmt = $this->connection->prepare($insertQuery);
             $stmt->execute([$name,$score]);
+        }
+
+        public function updateScore($name,$score){
+            $insertQuery = 'UPDATE `score_table` SET `score`=? WHERE `name` =?';
+            $stmt = $this->connection->prepare($insertQuery);
+            $stmt->execute([$score,$name]);
         }
 
         public function getTopScores() {
