@@ -2,7 +2,7 @@ version: '3.8'
 services:
   php:
     container_name: snakegame
-    image: php:8.0-apache
+    image: php:latest
     build:
       context: ./
       dockerfile: Dockerfile
