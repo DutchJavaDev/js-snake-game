@@ -24,14 +24,14 @@
         }
         
         public function nameExists($name) {
-            $setlectQuery = 'SELECT `name` from `snake_table` where `name` = ?';
+            $setlectQuery = 'SELECT `name` from `score_table` where `name` = ?';
             $stmt = $this->connection->prepare($setlectQuery);
             $stmt->execute([$name]);
             return count($stmt->fetchAll(PDO::FETCH_ASSOC));
         }
 
         public function addScore($name,$score) {
-            $insertQuery = 'INSERT INTO `snake_table`(`name`,`score`) VALUES (?,?)';
+            $insertQuery = 'INSERT INTO `score_table`(`name`,`score`) VALUES (?,?)';
             $stmt = $this->connection->prepare($insertQuery);
             $stmt->execute([$name,$score]);
         }
@@ -43,7 +43,7 @@
         }
 
         public function getTopScores() {
-            $setlectQuery = 'SELECT * FROM `snake_table` ORDER BY score DESC LIMIT 10';
+            $setlectQuery = 'SELECT * FROM `score_table` ORDER BY score DESC LIMIT 10';
             $stmt = $this->connection->prepare($setlectQuery);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
