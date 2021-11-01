@@ -50,7 +50,7 @@ function handlePostRequest($host, $db, $user, $password, $request_url, $check_us
     $parameters = parse_url($request_url, PHP_URL_QUERY);
 
     // http://localhost/api?checkusername=[username to check]
-    if(str_contains($parameters, $check_username_param))
+    if(strpos($parameters, $check_username_param) !== false )
     {
         if($databaseService->nameExists(str_split($parameters, strlen($check_username_param))[1])) {
             echo 'name has been taken, please try another';
@@ -73,7 +73,6 @@ function handlePostRequest($host, $db, $user, $password, $request_url, $check_us
         if($databaseService->nameExists($name))
         {
             $databaseService->updateScore($name, $score);
-            echo $name;
         }
         else
         {
