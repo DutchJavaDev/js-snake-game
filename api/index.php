@@ -2,8 +2,8 @@
 require_once("database.php");
 
 $request_method = $_SERVER['REQUEST_METHOD'];
-$host = 'localhost';
-$db = 'snake_db';
+$host = 'db';
+$db = 'snakedb';
 $user = 'root';
 $password = '';
 
