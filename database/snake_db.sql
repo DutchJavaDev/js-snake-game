@@ -26,10 +26,10 @@ USE `snakedb`;
 -- --------------------------------------------------------
 
 --
--- Tabelstructuur voor tabel `snake_table`
+-- Tabelstructuur voor tabel `score_table`
 --
 
-CREATE TABLE IF NOT EXISTS `snake_table` (
+CREATE TABLE IF NOT EXISTS `score_table` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `score` int(11) NOT NULL,
